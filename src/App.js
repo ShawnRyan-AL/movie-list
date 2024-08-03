@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import MediaList from './MediaList';
+import SearchInput from './SearchInput';
 import { TMDB_API_CONSTANTS, MEDIA_TYPES } from './tmdb-api-constants';
 
 
 function App() {
   const [media, setMedia] = useState([]);
 
-  function loadMediaListHandler(mediaListType) {
+  async function loadMediaListHandler(mediaListType) {
     const isMovieListMediaType = mediaListType === MEDIA_TYPES.POPULAR_MOVIES_LIST;
 
     const fetchURL =
@@ -14,9 +15,11 @@ function App() {
         TMDB_API_CONSTANTS.POPULAR_MOVIES_LIST :
         TMDB_API_CONSTANTS.POPULAR_TV_SHOWS_LIST;
 
-    fetch(fetchURL)
-      .then(res => res.json())
-      .then((data) => {
+    try {
+      const res = await fetch(fetchURL);
+      const data = await res.json();
+      // .then(res => res.json())
+      // .then((data) => {
         const shortenedResults = data.results.slice(0, 10);
         const reformattedMedia = shortenedResults.map(mediaData => {
           return {
@@ -29,17 +32,32 @@ function App() {
         })
         setMedia(reformattedMedia);
         console.log(shortenedResults);
-      })
+      // })
+    } catch (error) {
+
+    }
   }
 
+  function onSearchClick (searchedMedia) {
+    setMedia(searchedMedia);
+  }
 
   return (
     <React.Fragment>
+      <SearchInput onSearchClick={onSearchClick}/>
       <section>
-        <button onClick={() => loadMediaListHandler(MEDIA_TYPES.POPULAR_MOVIES_LIST)}>Load Popular Movies</button>
+        <button
+          onClick={() => loadMediaListHandler(MEDIA_TYPES.POPULAR_MOVIES_LIST)}
+        >
+          Load Popular Movies
+        </button>
       </section>
       <section>
-        <button onClick={() => loadMediaListHandler(MEDIA_TYPES.POPULAR_TV_SHOWS_LIST)}>Load Popular TV Shows</button>
+        <button
+          onClick={() => loadMediaListHandler(MEDIA_TYPES.POPULAR_TV_SHOWS_LIST)}
+        >
+          Load Popular TV Shows
+        </button>
       </section>
       <section>
         <MediaList mediaList={media} />
