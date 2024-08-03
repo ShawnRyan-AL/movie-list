@@ -12,6 +12,7 @@ function App () {
           return {
             id: movieData.id,
             title: movieData.original_title,
+            poster: `https://image.tmdb.org/t/p/original${movieData.poster_path}`,
             description: movieData.overview,
             releaseDate: movieData.release_date,
           }
