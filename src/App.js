@@ -1,34 +1,48 @@
 import React, { useState } from 'react';
-import MovieList from './MovieList';
+import MediaList from './MediaList';
+import { TMDB_API_CONSTANTS, MEDIA_TYPES } from './tmdb-api-constants';
 
-function App () {
-  const [movies, setMovies] = useState([]);
 
-  function loadMoviesHandler() {
-    fetch('https://api.themoviedb.org/3/movie/popular?api_key=2aa3c6dc8b4575cb4b74b946ab3f376f')
+function App() {
+  const [media, setMedia] = useState([]);
+
+  function loadMediaListHandler(mediaListType) {
+    const isMovieListMediaType = mediaListType === MEDIA_TYPES.POPULAR_MOVIES_LIST;
+
+    const fetchURL =
+      isMovieListMediaType ?
+        TMDB_API_CONSTANTS.POPULAR_MOVIES_LIST :
+        TMDB_API_CONSTANTS.POPULAR_TV_SHOWS_LIST;
+
+    fetch(fetchURL)
       .then(res => res.json())
       .then((data) => {
-        const reformattedMovies = data.results.map(movieData => {
+        const shortenedResults = data.results.slice(0, 10);
+        const reformattedMedia = shortenedResults.map(mediaData => {
           return {
-            id: movieData.id,
-            title: movieData.original_title,
-            poster: `https://image.tmdb.org/t/p/original${movieData.poster_path}`,
-            description: movieData.overview,
-            releaseDate: movieData.release_date,
+            id: mediaData.id,
+            title: isMovieListMediaType ? mediaData.original_title : mediaData.name,
+            poster: `https://image.tmdb.org/t/p/original${mediaData.poster_path}`,
+            description: mediaData.overview,
+            releaseDate: isMovieListMediaType ? mediaData.release_date : mediaData.first_air_date,
           }
         })
-        setMovies(reformattedMovies);
-        console.log(data);
+        setMedia(reformattedMedia);
+        console.log(shortenedResults);
       })
   }
-  
+
+
   return (
     <React.Fragment>
       <section>
-        <button onClick={loadMoviesHandler}>Load Popular Movies</button>
+        <button onClick={() => loadMediaListHandler(MEDIA_TYPES.POPULAR_MOVIES_LIST)}>Load Popular Movies</button>
       </section>
       <section>
-        <MovieList movies={movies}/>
+        <button onClick={() => loadMediaListHandler(MEDIA_TYPES.POPULAR_TV_SHOWS_LIST)}>Load Popular TV Shows</button>
+      </section>
+      <section>
+        <MediaList mediaList={media} />
       </section>
     </React.Fragment>
   )
