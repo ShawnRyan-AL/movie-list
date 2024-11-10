@@ -1,27 +1,16 @@
-import React, { useState } from 'react';
-import "./Movie.scss";
+import React from 'react';
+import "./Media.scss";
 
 const Media = (props) => {
-  const [isViewingDescription, setIsViewingDescription] = useState(false);
-
-  function openDescriptionHandler() {
-    setIsViewingDescription(true);
-  }
-
-  function closeDescriptionHandler() {
-    setIsViewingDescription(false);
-  }
-
   return (
-    <li>
-      <h2>{props.title}</h2>
+    <li className='media'>
+      <h2 className='media__h2'>{props.title}</h2>
       <h3>{props.releaseDate}</h3>
-      <img className='movie__img' src={props.poster} />
-      {
-        isViewingDescription ?
-          <button onClick={closeDescriptionHandler}>{props.description}</button> :
-          <button onClick={openDescriptionHandler}>Expand Description</button>
-      }
+      <img className='media__img' src={props.poster} />
+      <details>
+        <summary>Details</summary>
+        <p className='media__details'>{props.description}</p>
+      </details>
     </li>
   );
 };
