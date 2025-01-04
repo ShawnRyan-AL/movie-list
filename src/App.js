@@ -1,16 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
-import SearchInput from './SearchInput';
 import { TMDB_API_CONSTANTS, MEDIA_TYPES } from './tmdb-api-constants';
 import fetchUtil from './fetchUtil';
 import './App.scss';
+import SearchInput from './SearchInput';
 
 
 function App() {
-  const [media, setMedia] = useState([]);
+  const [inputText, setInputText] = useState('');
   const [mediaType, setMediaType] = useState('')
   const [userId, setUserId] = useState('');
   const [userListData, setUserListData] = useState([]);
+  const hasInitiallyRendered = useRef(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -26,6 +27,20 @@ function App() {
     } else if (!!sessionStorageSessionId) {
       getUserId();
     }
+  },
+    []
+  );
+
+  useEffect(() => {
+    if (hasInitiallyRendered.current) {
+      navigate('/search')
+    }
+  },
+    [inputText]
+  );
+
+  useEffect(() => {
+    hasInitiallyRendered.current = true;
   },
     []
   );
@@ -72,17 +87,13 @@ function App() {
     // console.log('state request token: ' + requestToken);
   }
 
-  function onSearchClick(searchedMedia) {
-    setMedia(searchedMedia);
-    navigate('/media-list');
-  }
 
   async function getUserListsHandler() {
     const fetchURL = TMDB_API_CONSTANTS.DISPLAY_LISTS + userId + '/lists'
-    // console.log(fetchURL);
+    // console.dir(fetchURL);
 
     const displayListResponse = await fetchUtil({ fetchURL });
-    // console.log('Display Lists: ' + displayListResponse);
+    // console.log('Display Lists: ' + JSON.stringify(displayListResponse));
 
     // console.log('session id: ' + Object.keys(displayListResponse.results[0]));
     // console.log('session id: ' + Object.values(displayListResponse.results[0]));
@@ -102,11 +113,22 @@ function App() {
   }
 
   function onPopularMovieClick() {
-    setMediaType(MEDIA_TYPES.POPULAR_MOVIES_LIST);
+    setMediaType(MEDIA_TYPES.MOVIES);
     navigate('popular');
   }
 
-  // console.log(userListData);
+  function onPopularTVShowsClick() {
+    setMediaType(MEDIA_TYPES.TV_SHOWS);
+    navigate('popular');
+  }
+
+  //  console.dir(mediaType);
+
+  function onSearchClickHandler(text) {
+    setInputText(text);
+    // console.dir(text);
+    navigate('/search');
+  }
 
   return (
     <div>
@@ -114,29 +136,32 @@ function App() {
         !userId &&
         <button onClick={tokenRequestHandler}>Link Account</button>
       }
-      <SearchInput onSearchClick={onSearchClick} />
+      <SearchInput onSearchClick={onSearchClickHandler} />
       <div className='app__buttons-container'>
         <button
           className='app__button'
           onClick={onPopularMovieClick}
-          disabled={mediaType === MEDIA_TYPES.POPULAR_MOVIES_LIST}
+        // disabled={mediaType === MEDIA_TYPES.MOVIES}
         >
           Load Popular Movies
         </button>
         <button
           className='app__button'
-          onClick={() => navigate('popular')}
+          onClick={onPopularTVShowsClick}
+        // disabled={mediaType === MEDIA_TYPES.TV_SHOWS}
         >
           Load Popular TV Shows
         </button>
         <button
           className='app__button'
           onClick={getUserListsHandler}
+          disabled={!userId}
+          title='Link a TMDB user account to access My Stuff'
         >
           My Stuff
         </button>
       </div>
-      <Outlet context={[mediaType]} />
+      <Outlet context={{ mediaType, userListData, inputText }} />
     </div>
   )
 }

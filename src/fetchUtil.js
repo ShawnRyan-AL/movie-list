@@ -2,7 +2,7 @@ import { TMDB_API_KEY } from "./tmdb-api-constants";
 
 let sessionId
 
-export default async function FetchUtil({ fetchURL, method, body, requestParams = {} }) {
+export default async function FetchUtil({ fetchURL, method, body, requestParams = {}, testParam = true }) {
   try {
     if (!sessionId && sessionStorage.getItem('session_id')) {
       sessionId = sessionStorage.getItem('session_id')
@@ -12,11 +12,25 @@ export default async function FetchUtil({ fetchURL, method, body, requestParams 
     // console.log(fetchURL);
     // console.log(method);
     // console.log(body);
-    const fullURL = `${fetchURL}?${new URLSearchParams({
+    let params = {
       ...requestParams,
-      'api_key': TMDB_API_KEY,
-      'session_id': sessionId,
-    })}`
+    }
+
+    if (testParam) {
+      params = {
+        ...requestParams,
+        'api_key': TMDB_API_KEY,
+        'session_id': sessionId,
+      }
+    }
+
+    let stringifiedParams = ''
+
+    if (Object.keys(params).length != 0) {
+      stringifiedParams = `?${new URLSearchParams(params)}`
+    }
+
+    const fullURL = `${fetchURL}${stringifiedParams}`
     // console.log('fullurl: ' + fullURL);
     // console.log(new URLSearchParams({ 'session_id': sessionId }));
     // console.log(new URLSearchParams({ 'session_id': sessionId }).toString());

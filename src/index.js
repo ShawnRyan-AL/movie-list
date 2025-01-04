@@ -5,9 +5,11 @@ import './index.css';
 import App from './App';
 import MediaList from './MediaList';
 import MyStuffList from './MyStuffList';
+import Overview from './Overview';
 import Popular from './Popular';
 import reportWebVitals from './reportWebVitals';
 import ErrorPage from './ErrorPage';
+import Search from './Search';
 
 const router = createBrowserRouter([
   {
@@ -31,10 +33,18 @@ const router = createBrowserRouter([
           ]
       },
       {
+        path: 'search',
+        element: <Search />,
+      },
+      {
         path: 'my-stuff-list',
         element: <MyStuffList />,
         children:
           [
+            {
+              path: 'overview',
+              element: <Overview />,
+            },
             {
               path: 'list-contents',
               element: <MediaList />,
