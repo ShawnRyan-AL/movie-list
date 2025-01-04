@@ -1,0 +1,34 @@
+.media {
+  align-items: center;
+  background-color: white;
+  border: solid;
+  border-color: black;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  height: 550px;
+  text-align: center;
+  margin: 20px 10px;
+  width: 300px;
+
+  &__h2 {
+    height: 5%;
+  }
+
+  &__img {
+    height: 300px;
+    width: 200px;
+  }
+
+  &__details {
+    height: 75px;
+    overflow-y: scroll;
+    padding: 1px 10px 5px;
+    width: 275px;
+  }
+
+}
+
+
+// Add spacing to the details items so it doesn't move the other items when it is opened.

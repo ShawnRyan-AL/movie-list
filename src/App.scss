@@ -1,0 +1,21 @@
+.app {
+
+  &__buttons-container {
+    background-color: aquamarine;
+    border: solid;
+    border-color: black;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    margin: 10px 50px 20px;
+  }
+
+  &__button {
+    background-color: white;
+    border-radius: 10px;
+    font-weight: bold;
+    margin: 20px 50px 20px;
+    padding: 10px 50px 10px;
+  }
+}

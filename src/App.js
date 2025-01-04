@@ -1,50 +1,168 @@
-import React, { useState } from 'react';
-import MediaList from './MediaList';
+import React, { useState, useEffect, useRef } from 'react';
+import { Outlet, useNavigate } from 'react-router-dom';
 import { TMDB_API_CONSTANTS, MEDIA_TYPES } from './tmdb-api-constants';
+import fetchUtil from './fetchUtil';
+import './App.scss';
+import SearchInput from './SearchInput';
 
 
 function App() {
-  const [media, setMedia] = useState([]);
+  const [inputText, setInputText] = useState('');
+  const [mediaType, setMediaType] = useState('')
+  const [userId, setUserId] = useState('');
+  const [userListData, setUserListData] = useState([]);
+  const hasInitiallyRendered = useRef(false);
+  const navigate = useNavigate();
 
-  function loadMediaListHandler(mediaListType) {
-    const isMovieListMediaType = mediaListType === MEDIA_TYPES.POPULAR_MOVIES_LIST;
+  useEffect(() => {
+    const currentUrl = window.location.search;
+    const requestTokenMatch = currentUrl.match(/(?<=request_token=)([0-z])*/g);
+    // console.log(requestTokenMatch);
+    const approvalStatusMatch = currentUrl.match(/(?<=approved=)([a-z])*/g);
+    // console.log(approvalStatusMatch);
+    const sessionStorageSessionId = sessionStorage.getItem('session_id')
 
-    const fetchURL =
-      isMovieListMediaType ?
-        TMDB_API_CONSTANTS.POPULAR_MOVIES_LIST :
-        TMDB_API_CONSTANTS.POPULAR_TV_SHOWS_LIST;
+    if (requestTokenMatch && approvalStatusMatch) {
+      getSessionIdAndClearUrl(requestTokenMatch[0]);
+    } else if (!!sessionStorageSessionId) {
+      getUserId();
+    }
+  },
+    []
+  );
 
-    fetch(fetchURL)
-      .then(res => res.json())
-      .then((data) => {
-        const shortenedResults = data.results.slice(0, 10);
-        const reformattedMedia = shortenedResults.map(mediaData => {
-          return {
-            id: mediaData.id,
-            title: isMovieListMediaType ? mediaData.original_title : mediaData.name,
-            poster: `https://image.tmdb.org/t/p/original${mediaData.poster_path}`,
-            description: mediaData.overview,
-            releaseDate: isMovieListMediaType ? mediaData.release_date : mediaData.first_air_date,
-          }
-        })
-        setMedia(reformattedMedia);
-        console.log(shortenedResults);
-      })
+  useEffect(() => {
+    if (hasInitiallyRendered.current) {
+      navigate('/search')
+    }
+  },
+    [inputText]
+  );
+
+  useEffect(() => {
+    hasInitiallyRendered.current = true;
+  },
+    []
+  );
+
+  async function getSessionIdAndClearUrl(requestToken) {
+    // console.log('requestToken: ' + requestToken);
+    const requestBody = JSON.stringify({ request_token: requestToken })
+    //  console.log('requestBody: ' + requestBody);
+    const sessionIdResponse = await fetchUtil({
+      fetchURL: TMDB_API_CONSTANTS.SESSION_ID_REQUEST,
+      method: 'POST',
+      body: requestBody,
+    });
+
+    // console.log('session id: ' + Object.keys(sessionIdResponse));
+    // console.log('session id: ' + Object.values(sessionIdResponse));
+
+    sessionStorage.setItem('session_id', sessionIdResponse.session_id)
+    window.location.assign('http://localhost:3000/')
+  }
+
+  async function getUserId() {
+    const fetchURL = TMDB_API_CONSTANTS.DETAILS;
+    const userIdResponse = await fetchUtil({ fetchURL })
+    // console.log(userIdResponse);
+    setUserId(userIdResponse.id);
+    // console.log(userId);
+  }
+
+  // console.log(requestToken);
+  async function tokenRequestHandler() {
+    const { request_token } = await fetchUtil({
+      fetchURL: TMDB_API_CONSTANTS.TOKEN_REQUEST,
+      method: 'GET',
+    });
+    // console.log('Request Token: ' + request_token);
+
+    window.location.assign(
+      TMDB_API_CONSTANTS.AUTHENTICATION_REQUEST +
+      request_token +
+      TMDB_API_CONSTANTS.AUTHENTICATION_REDIRECT_URL,
+    );
+
+    // console.log('state request token: ' + requestToken);
   }
 
 
+  async function getUserListsHandler() {
+    const fetchURL = TMDB_API_CONSTANTS.DISPLAY_LISTS + userId + '/lists'
+    // console.dir(fetchURL);
+
+    const displayListResponse = await fetchUtil({ fetchURL });
+    // console.log('Display Lists: ' + JSON.stringify(displayListResponse));
+
+    // console.log('session id: ' + Object.keys(displayListResponse.results[0]));
+    // console.log('session id: ' + Object.values(displayListResponse.results[0]));
+
+    const displayLists = displayListResponse.results.map(listData => {
+      return {
+        id: listData.id,
+        title: listData.name,
+        itemCount: listData.item_count,
+      }
+    });
+    // console.log(displayLists)
+
+    setUserListData(displayLists);
+
+    navigate('/my-stuff-list');
+  }
+
+  function onPopularMovieClick() {
+    setMediaType(MEDIA_TYPES.MOVIES);
+    navigate('popular');
+  }
+
+  function onPopularTVShowsClick() {
+    setMediaType(MEDIA_TYPES.TV_SHOWS);
+    navigate('popular');
+  }
+
+  //  console.dir(mediaType);
+
+  function onSearchClickHandler(text) {
+    setInputText(text);
+    // console.dir(text);
+    navigate('/search');
+  }
+
   return (
-    <React.Fragment>
-      <section>
-        <button onClick={() => loadMediaListHandler(MEDIA_TYPES.POPULAR_MOVIES_LIST)}>Load Popular Movies</button>
-      </section>
-      <section>
-        <button onClick={() => loadMediaListHandler(MEDIA_TYPES.POPULAR_TV_SHOWS_LIST)}>Load Popular TV Shows</button>
-      </section>
-      <section>
-        <MediaList mediaList={media} />
-      </section>
-    </React.Fragment>
+    <div>
+      {
+        !userId &&
+        <button onClick={tokenRequestHandler}>Link Account</button>
+      }
+      <SearchInput onSearchClick={onSearchClickHandler} />
+      <div className='app__buttons-container'>
+        <button
+          className='app__button'
+          onClick={onPopularMovieClick}
+        // disabled={mediaType === MEDIA_TYPES.MOVIES}
+        >
+          Load Popular Movies
+        </button>
+        <button
+          className='app__button'
+          onClick={onPopularTVShowsClick}
+        // disabled={mediaType === MEDIA_TYPES.TV_SHOWS}
+        >
+          Load Popular TV Shows
+        </button>
+        <button
+          className='app__button'
+          onClick={getUserListsHandler}
+          disabled={!userId}
+          title='Link a TMDB user account to access My Stuff'
+        >
+          My Stuff
+        </button>
+      </div>
+      <Outlet context={{ mediaType, userListData, inputText }} />
+    </div>
   )
 }
 

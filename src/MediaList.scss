@@ -1,0 +1,12 @@
+.media-list {
+  background-color: aquamarine;
+  border: solid;
+  border-color: black;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+  gap: 10px 30px;
+  margin: 10px 50px 20px;
+}
