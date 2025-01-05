@@ -7,9 +7,6 @@ import Paginator from './Paginator';
 const MediaList = (props) => {
   const { mediaList, onPageChange, page } = useOutletContext();
 
-  // console.dir('mediaList: ' + mediaList);
-  // console.dir('something: ' + mediaList.map((item) => item.id))
-
   const mediaListToUse = props.mediaList || mediaList;
   const onPageChangeToUse = props.onPageChange || onPageChange;
   const pageToUse = props.page || page;

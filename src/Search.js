@@ -25,7 +25,7 @@ export default function Search() {
         },
         testParam: true,
       });
-      // console.dir(movieRes);
+
       const tvShowRes = await fetchUtil({
         fetchURL: `${TMDB_API_CONSTANTS.SEARCH_TV_SHOWS}`,
         requestParams: {
@@ -35,16 +35,12 @@ export default function Search() {
         testParam: true,
       });
 
-      // const movieData = await movieRes.json();
-      // const tvShowData = await tvShowRes.json();
       const allData = [...movieRes.results, ...tvShowRes.results]
-      // console.log(allData);
+
       const sortedMedia = allData.sort((a, b) => {
-        // console.log('a: ', a.popularity)
-        // console.log('b: ', b.popularity)
         return b.popularity - a.popularity;
       })
-      // console.log(' ratings: ', sortedMedia.map((media) => media.popularity))
+
       const searchedMedia = sortedMedia.map(mediaData => {
         return {
           id: mediaData.id,
@@ -62,7 +58,6 @@ export default function Search() {
 
   function onPageChange(pageNumber) {
     setPage(pageNumber);
-    // console.dir('check:' + pageNumber);
   }
 
   return (
