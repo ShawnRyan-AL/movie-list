@@ -12,9 +12,7 @@ function MyStuffList() {
 
   async function onListSelection(id) {
     const fetchURL = TMDB_API_CONSTANTS.LIST_CONTENTS + id;
-    // console.dir(fetchURL);
     const listContentsResponse = await fetchUtil({ fetchURL });
-    // console.dir(listContentsResponse);
 
     const alteredListContents = listContentsResponse.items.map((item) => {
       return {
@@ -25,14 +23,12 @@ function MyStuffList() {
         description: item.overview,
       }
     })
-    // console.dir(alteredListContents);
 
     setListContents(alteredListContents);
-    // console.dir(listContents);
 
     navigate('/my-stuff-list/list-contents');
 
-    
+
   }
 
   return (
@@ -48,7 +44,7 @@ function MyStuffList() {
           />
         ))}
       </ul>
-      <Outlet context={{ mediaList: listContents}} />
+      <Outlet context={{ mediaList: listContents }} />
     </div>
   );
 }
