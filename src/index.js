@@ -5,7 +5,6 @@ import './index.css';
 import App from './App';
 import MediaList from './MediaList';
 import MyStuffList from './MyStuffList';
-import Overview from './Overview';
 import Popular from './Popular';
 import reportWebVitals from './reportWebVitals';
 import ErrorPage from './ErrorPage';
@@ -41,10 +40,6 @@ const router = createBrowserRouter([
         element: <MyStuffList />,
         children:
           [
-            {
-              path: 'overview',
-              element: <Overview />,
-            },
             {
               path: 'list-contents',
               element: <MediaList />,

@@ -5,11 +5,15 @@ export default function Paginator(props) {
   }
 
   function onPreviousClick() {
-    props.onPageChange(props.currentPage - 1)
+    if (props.currentPage !== 1) {
+      props.onPageChange(props.currentPage - 1)
+    }
   }
 
   function onNextChange() {
-    props.onPageChange(props.currentPage + 1)
+    if (props.currentPage !== 500) {
+      props.onPageChange(props.currentPage + 1)
+    }
   }
 
   function onLastClick() {
